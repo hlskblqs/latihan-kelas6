@@ -962,12 +962,26 @@ function syncTopics(){
   $('tpList').querySelectorAll('.tp').forEach(d=>{const s=[...d.querySelectorAll('input.sub')],c=s.filter(x=>x.checked).length,t=d.querySelector('input.top');t.checked=c===s.length;t.indeterminate=c>0&&c<s.length;});
   const n=chosen().length;$('tpInfo').textContent=n?n+' subtopik dipilih':'pilih minimal satu topik';$('btnStart').disabled=!n;
 }
+/* Urutan soal: topik diacak dan diselang-seling, jadi dua soal berturut-turut tidak berasal dari topik yang sama
+   (atau subtopik yang sama, jika hanya satu topik yang dipilih). Porsi tiap topik sebanding dengan banyak subtopiknya. */
+function spread(list,key){
+  const g={};list.forEach(i=>{(g[key(i)]=g[key(i)]||[]).push(i);});Object.values(g).forEach(a=>a.sort(()=>Math.random()-0.5));
+  const out=[];let prev=null;
+  while(out.length<list.length){
+    const live=Object.keys(g).filter(k=>g[k].length);let cand=live.filter(k=>k!==prev);if(!cand.length)cand=live;
+    const rem=live.reduce((a,k)=>a+g[k].length,0),big=cand.find(k=>g[k].length>rem-g[k].length);
+    let k=big;if(!k){let r=Math.random()*cand.reduce((a,c)=>a+g[c].length,0);for(const c of cand){r-=g[c].length;if(r<0){k=c;break;}}if(!k)k=cand[cand.length-1];}
+    out.push(g[k].pop());prev=k;}
+  return out;
+}
 function newSession(n,name,fbmode,bank){
-  const pool=chosen();let order;
-  if(pool.length===n)order=shuffle(pool);
-  else{const tp=TOPICS.filter(t=>pool.some(i=>IND[i][1]===t));const byT=tp.map(t=>shuffle(pool.filter(i=>IND[i][1]===t)));const first=byT.map(a=>a[0]);let rest=shuffle(byT.flatMap(a=>a.slice(1)));
-    while(first.length+rest.length<n)rest=rest.concat(shuffle(pool));order=shuffle([...first,...rest].slice(0,n));
-    for(let i=1;i<order.length;i++)if(order[i]===order[i-1]){const j=order.findIndex((x,k)=>k>i&&x!==order[i]&&x!==order[i-1]&&(k+1>=order.length||order[k+1]!==order[i]));if(j>0)[order[i],order[j]]=[order[j],order[i]];}}
+  const pool=chosen();let multi;
+  if(pool.length>=n){const tp=TOPICS.filter(t=>pool.some(i=>IND[i][1]===t));const first=tp.map(t=>pick(pool.filter(i=>IND[i][1]===t)));
+    multi=[...first,...shuffle(pool.filter(i=>!first.includes(i)))].slice(0,n);}
+  else{multi=[];while(multi.length<n)multi=multi.concat(shuffle(pool));multi=multi.slice(0,n);}
+  const nT=new Set(pool.map(i=>IND[i][1])).size;
+  let order=spread(multi,nT>1?(i=>IND[i][1]):(i=>String(i)));
+  for(let i=1;i<order.length;i++)if(order[i]===order[i-1]){const j=order.findIndex((x,k)=>k>i&&x!==order[i]&&(k+1>=order.length||order[k+1]!==order[i])&&order[k-1]!==order[i-1]);if(j>0)[order[i],order[j]]=[order[j],order[i]];}
   const post=GRID.map(t=>Math.exp(-t*t/2));const z=post.reduce((a,b)=>a+b);
   const tps=[...new Set(pool.map(i=>IND[i][1]))];
   return {name,fbmode,bank,tlabel:tps.length===TOPICS.filter(t=>poolOf(bank).some(i=>IND[i][1]===t)).length&&pool.length===poolOf(bank).length?'semua topik':tps.join(', '),order,post:post.map(p=>p/z),pos:0,items:[],start:Date.now(),path:[0]};
