@@ -129,7 +129,7 @@ table.kat input{width:20px;height:20px;accent-color:var(--blue);cursor:pointer}
 <body>
 
 <header class="top">
-  <a href="index.html" class="homebtn" style="color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.55);border-radius:8px;padding:5px 11px;font-size:14px;font-weight:600;white-space:nowrap" onclick="return true">‹ Menu</a>
+  <a href="index.html" class="homebtn" style="color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.55);border-radius:8px;padding:5px 11px;font-size:14px;font-weight:600;white-space:nowrap">‹ Menu</a>
   <div class="brand"><span id="brandT">TO TKA Matematika SD 2026</span><small>Kelas 6 · <span id="nSoal">30</span> soal · <span id="paketTop">angka soal berubah setiap tryout</span></small></div>
   <div class="spacer"></div>
   <div class="who" id="who"></div>
@@ -146,7 +146,7 @@ table.kat input{width:20px;height:20px;accent-color:var(--blue);cursor:pointer}
     <option value="tka">TO TKA · 30 soal sesuai kisi-kisi</option>
     <option value="lab">Seleksi SMP (gaya Labschool) · 40 soal pilihan ganda</option>
   </select>
-  <p style="font-size:14px;margin:6px 0 0" id="jenisInfo">Paket Seleksi SMP berisi pecahan, perbandingan, diskon, luas bangun datar, dan volume, berurutan dari mudah ke HOTS.</p>
+  <p style="font-size:14px;margin:6px 0 0" id="jenisInfo">Paket Seleksi SMP berisi pecahan, perbandingan, diskon, luas bangun datar, dan volume, berurutan dari mudah ke sukar (tanpa soal HOTS).</p>
   <label for="nama">Nama / inisial peserta</label>
   <input id="nama" placeholder="contoh: A.R." maxlength="40">
   <label for="kode">Kode paket (opsional)</label>
@@ -747,64 +747,54 @@ const FRP=[[1,2],[1,3],[2,3],[1,4],[3,4],[1,5],[2,5],[3,5],[1,6],[3,8],[5,8]];
 const coprimePair=()=>{for(;;){const b=pick([3,4,5,6,8]),a=ri(1,b-1);if(gcd(a,b)===1)return [a,b];}};
 const intOK=x=>Number.isInteger(+x.toFixed(9))&&x>0;
 
-/* 30 Pecahan: bagian diketahui, cari keseluruhan */
+/* 30 Pecahan: bagian diketahui, cari keseluruhan
+   Mudah: bagian 1/b · Sedang: bagian a/b · Sukar: dua bagian dipakai, sisa diketahui */
+const L30CTX=[['Ayah menyimpan','dari gajinya di bank','uang yang disimpan Ayah','gaji Ayah'],['Budi menabung','bagian dari uang sakunya','tabungan Budi','uang saku Budi'],['Kakak memakai','dari uangnya untuk membeli buku','uang untuk membeli buku','uang Kakak mula-mula']];
 G[30]=l=>{
-  if(l===0){const [a,b]=coprimePair(),u=pick([5000,10000,25000,50000]),X=b*ri(4,30)*u,Y=X*a/b;
-    const ctx=pick([['Ayah menyimpan','dari gajinya di bank','uang yang disimpan Ayah','gaji Ayah'],['Budi menabung','bagian dari uang sakunya','tabungan Budi','uang saku Budi'],['Kakak memakai','dari uangnya untuk membeli buku','uang untuk membeli buku','uang Kakak mula-mula']]);
-    return mk(`${ctx[0]} <b>${fs(a,b)}</b> ${ctx[1]}. Jika ${ctx[2]} adalah <b>${rp(Y)}</b>, maka ${ctx[3]} adalah ....`,X,[Y*b,Y*(b-a)/a,X+Y,Y*b/(b-a)].filter(intOK),rp,
-      `${fs(a,b)} bagian = ${rp(Y)}, jadi 1/${b} bagian = ${rp(Y)} : ${a} = ${rp(Y/a)}. Seluruhnya = ${b} × ${rp(Y/a)} = ${rp(X)}.`);}
-  if(l===1){for(;;){const [a,b]=pick(FRP),[c,d]=pick(FRP);if(b===d)continue;const L=lcm(b,d),r=L-a*L/b-c*L/d;if(r<=0||gcd(r,L)===L)continue;
+  if(l<2){let a,b;if(l===0){a=1;b=pick([2,3,4,5,6,8]);}else{for(;;){[a,b]=coprimePair();if(a>1)break;}}
+    const u=pick([5000,10000,25000,50000]),X=b*ri(4,30)*u,Y=X*a/b,ctx=pick(L30CTX);
+    return mk(`${ctx[0]} <b>${fs(a,b)}</b> ${ctx[1]}. Jika ${ctx[2]} adalah <b>${rp(Y)}</b>, maka ${ctx[3]} adalah ....`,X,[Y*b,a>1?Y*(b-a)/a:Y*(b-1),X+Y,Y*b/(b-a)].filter(intOK),rp,
+      a===1?`${fs(1,b)} bagian = ${rp(Y)}, jadi seluruhnya = ${b} × ${rp(Y)} = ${rp(X)}.`:`${fs(a,b)} bagian = ${rp(Y)}, jadi 1/${b} bagian = ${rp(Y)} : ${a} = ${rp(Y/a)}. Seluruhnya = ${b} × ${rp(Y/a)} = ${rp(X)}.`);}
+  for(;;){const [a,b]=pick(FRP),[c,d]=pick(FRP);if(b===d)continue;const L=lcm(b,d),r=L-a*L/b-c*L/d;if(r<=0||gcd(r,L)===L)continue;
     const ctx=pick([{t:'Dina menerima uang saku dari ibunya. Sebanyak <b>{A}</b> bagian digunakan untuk jajan dan <b>{C}</b> bagian ditabung. Jika sisa uang saku Dina <b>{R}</b>, maka uang saku Dina adalah ....',u:pick([1000,2000,5000]),f:rp},
       {t:'Sebuah kebun ditanami jagung seluas <b>{A}</b> bagian dan sayuran seluas <b>{C}</b> bagian dari seluruh kebun. Jika sisa kebun yang belum ditanami seluas <b>{R}</b>, maka luas seluruh kebun adalah ....',u:pick([5,10,20]),f:x=>nf(x)+' m²'}]);
     const X=L*ri(2,12)*ctx.u,R=X*r/L,A1=X*a/b;
     return mk(ctx.t.replace('{A}',fs(a,b)).replace('{C}',fs(c,d)).replace('{R}',ctx.f(R)),X,[R+A1,R*b,R*d,R+X*c/d].filter(intOK),ctx.f,
-      `Sisa = 1 − ${fs(a,b)} − ${fs(c,d)} = ${fs(r,L)} bagian. ${fs(r,L)} bagian = ${ctx.f(R)}, jadi seluruhnya = ${ctx.f(R)} : ${r} × ${L} = ${ctx.f(X)}.`);}}
-  for(;;){const a=1,b=pick([4,5,6]),c=1,d=pick([3,4]),e=pick([1,2]),f=3;
-    const F=new Fr(b-a,b).mul(new Fr(d-c,d)).mul(new Fr(f-e,f));const u=pick([50000,100000]),X=F.d*ri(2,8)*u,R=X*F.n/F.d;
-    const s1=X*(b-a)/b,s2=s1*(d-c)/d;if(!Number.isInteger(s1/1000)||!Number.isInteger(s2/1000))continue;
-    const add=1-a/b-c/d-e/f;const w=[R/(1-a/b),R/((1-a/b)*(1-c/d)),add>0?R/add:null,X+R];
-    return mk(`Gaji Pak Dedi digunakan <b>${fs(a,b)}</b> bagian untuk sewa rumah. Kemudian <b>${fs(c,d)}</b> dari sisanya digunakan untuk makan, dan <b>${fs(e,f)}</b> dari sisa berikutnya ditabung. Jika sisa uang Pak Dedi sekarang <b>${rp(R)}</b>, maka gaji Pak Dedi adalah ....`,X,w.filter(x=>x&&intOK(x/1000)),rp,
-      `Sisa = ${fs(b-a,b)} × ${fs(d-c,d)} × ${fs(f-e,f)} = ${fs(F.n,F.d)} gaji. ${fs(F.n,F.d)} bagian = ${rp(R)}, jadi gaji = ${rp(R)} : ${F.n} × ${F.d} = ${rp(X)}. Pecahan kedua dan ketiga dihitung dari sisa, bukan dari gaji awal.`);}
+      `Sisa = 1 − ${fs(a,b)} − ${fs(c,d)} = ${fs(r,L)} bagian. ${fs(r,L)} bagian = ${ctx.f(R)}, jadi seluruhnya = ${ctx.f(R)} : ${r} × ${L} = ${ctx.f(X)}.`);}
 };
 
-/* 31 Pecahan: dipakai bertahap */
+/* 31 Pecahan: dipakai bertahap
+   Mudah: sisa telur · Sedang: sisa uang · Sukar: "... dari sisanya", sisa diketahui, cari mula-mula */
 G[31]=l=>{
-  if(l===0){for(;;){const [a,b]=pick(FRP),[c,d]=pick(FRP);if(b===d)continue;const L=lcm(b,d),r=L-a*L/b-c*L/d;if(r<=0)continue;
-    const ctx=pick([{t:'Ibu memiliki {N} butir telur. Sebanyak {A} bagian digunakan untuk membuat kue dan {C} bagian diberikan kepada tetangga. Sisa telur Ibu sekarang adalah ....',u:1,f:x=>nf(x)+' butir',lo:2,hi:6},
-      {t:'Ibu memiliki uang {N}. Sebanyak {A} bagian digunakan untuk membeli beras dan {C} bagian digunakan untuk membeli sayur. Sisa uang Ibu sekarang adalah ....',u:5000,f:rp,lo:2,hi:12}]);
+  if(l<2){for(;;){const [a,b]=pick(FRP),[c,d]=pick(FRP);if(b===d)continue;const L=lcm(b,d),r=L-a*L/b-c*L/d;if(r<=0)continue;
+    const ctx=l===0?{t:'Ibu memiliki {N} telur. Sebanyak {A} bagian digunakan untuk membuat kue dan {C} bagian diberikan kepada tetangga. Sisa telur Ibu sekarang adalah ....',u:1,f:x=>nf(x)+' butir',lo:2,hi:6}
+      :{t:'Ibu memiliki uang {N}. Sebanyak {A} bagian digunakan untuk membeli beras dan {C} bagian digunakan untuk membeli sayur. Sisa uang Ibu sekarang adalah ....',u:5000,f:rp,lo:2,hi:12};
+    if(l===0&&L>12)continue;
     const N0=L*ri(ctx.lo,ctx.hi)*ctx.u,ans=N0*r/L;
     return mk(ctx.t.replace('{N}',`<b>${ctx.f(N0)}</b>`).replace('{A}',`<b>${fs(a,b)}</b>`).replace('{C}',`<b>${fs(c,d)}</b>`),ans,[N0-N0*a/b,N0*(a*L/b+c*L/d)/L,N0*(b-a)/b*(d-c)/d].filter(intOK),ctx.f,
       `Terpakai ${fs(a,b)} × ${ctx.f(N0)} = ${ctx.f(N0*a/b)} dan ${fs(c,d)} × ${ctx.f(N0)} = ${ctx.f(N0*c/d)}. Sisa = ${ctx.f(N0)} − ${ctx.f(N0*a/b)} − ${ctx.f(N0*c/d)} = ${ctx.f(ans)}.`);}}
-  if(l===1){for(;;){const [a,b]=pick(FRP),[c,d]=pick(FRP);const F=new Fr(b-a,b).mul(new Fr(d-c,d));
+  for(;;){const [a,b]=pick(FRP),[c,d]=pick(FRP);const F=new Fr(b-a,b).mul(new Fr(d-c,d));
     const ctx=pick([{t:'Sebuah pita dipakai {A} bagian untuk hiasan, kemudian {C} dari sisanya dipakai untuk membungkus kado. Jika sisa pita sekarang {R}, maka panjang pita mula-mula adalah ....',f:x=>nf(x)+' m'},
-      {t:'Pak Ali memiliki sejumlah mangga. Sebanyak {A} bagian dijual, kemudian {C} dari sisanya dibagikan kepada tetangga. Jika mangga yang tersisa sekarang {R}, maka berat mangga mula-mula adalah ....',f:x=>nf(x)+' kg'},
-      {t:'Rani membaca sebuah buku. Pada hari pertama ia membaca {A} bagian buku, pada hari kedua ia membaca {C} dari sisa buku, dan pada hari ketiga ia membaca sisanya sebanyak {R}. Jumlah halaman buku tersebut adalah ....',f:x=>nf(x)+' halaman'}]);
+      {t:'Pak Ali memiliki sejumlah mangga. Sebanyak {A} bagian dijual, kemudian {C} dari sisanya dibagikan kepada tetangga. Jika mangga yang tersisa sekarang {R}, maka berat mangga mula-mula adalah ....',f:x=>nf(x)+' kg'}]);
     const X=F.d*ri(2,8),R=X*F.n/F.d;if(X>200)continue;const add=1-a/b-c/d;
     return mk(ctx.t.replace('{A}',`<b>${fs(a,b)}</b>`).replace('{C}',`<b>${fs(c,d)}</b>`).replace('{R}',`<b>${ctx.f(R)}</b>`),X,[add>0?R/add:null,R/(1-a/b),R*d/(d-c)+R*a/b].filter(x=>x&&intOK(x)),ctx.f,
-      `Setelah tahap pertama tersisa ${fs(b-a,b)}. Tahap kedua memakai ${fs(c,d)} dari sisa itu, jadi tersisa ${fs(b-a,b)} × ${fs(d-c,d)} = ${fs(F.n,F.d)} bagian. ${fs(F.n,F.d)} bagian = ${ctx.f(R)}, jadi mula-mula = ${nf(R)} : ${F.n} × ${F.d} = ${ctx.f(X)}.`);}}
-  for(;;){const [a,b]=pick([[2,5],[1,4],[1,3],[3,5],[1,5]]),[c,d]=pick([[1,3],[1,4],[1,2],[2,3]]);const F=new Fr(b-a,b).mul(new Fr(d-c,d));
-    const X=F.d*ri(4,20)*5;if(X>400)continue;const S2=X*F.n/F.d,Fx=pick([10,15,20,25,30]),R=S2-Fx;if(R<=10)continue;
-    const add=1-a/b-c/d;
-    return mk(`Seorang pedagang membeli beras. Pada hari pertama terjual <b>${fs(a,b)}</b> bagian, pada hari kedua terjual <b>${fs(c,d)}</b> dari sisa hari pertama, dan pada hari ketiga terjual <b>${Fx} kg</b> sehingga tersisa <b>${R} kg</b>. Berat beras mula-mula adalah ....`,X,
-      [R*F.d/F.n,add>0?(R+Fx)/add:null,(R+Fx)/(1-a/b)].filter(x=>x&&intOK(x)),x=>nf(x)+' kg',
-      `Sebelum hari ketiga beras ada ${R} + ${Fx} = ${R+Fx} kg. Itu sama dengan ${fs(b-a,b)} × ${fs(d-c,d)} = ${fs(F.n,F.d)} bagian. Mula-mula = ${R+Fx} : ${F.n} × ${F.d} = ${X} kg.`);}
+      `Setelah tahap pertama tersisa ${fs(b-a,b)}. Tahap kedua memakai ${fs(c,d)} dari sisa itu, jadi tersisa ${fs(b-a,b)} × ${fs(d-c,d)} = ${fs(F.n,F.d)} bagian. ${fs(F.n,F.d)} bagian = ${ctx.f(R)}, jadi mula-mula = ${nf(R)} : ${F.n} × ${F.d} = ${ctx.f(X)}.`);}
 };
 
-/* 32 Pecahan: simpanan dan perbandingan uang */
+/* 32 Pecahan: simpanan
+   Mudah: uang yang tidak disimpan · Sedang: sisa simpanan setelah dipakai · Sukar: sisa simpanan diketahui, cari gaji */
 G[32]=l=>{
   if(l===0){const [a,b]=coprimePair(),X=b*ri(3,20)*100000,S=X*a/b;
     return mk(`Ibu menyimpan <b>${fs(a,b)}</b> dari gajinya. Jika gaji Ibu <b>${rp(X)}</b>, maka uang yang <b>tidak</b> disimpan Ibu adalah ....`,X-S,[S,X/b,X-X/b],rp,
       `Uang yang disimpan = ${fs(a,b)} × ${rp(X)} = ${rp(S)}. Yang tidak disimpan = ${rp(X)} − ${rp(S)} = ${rp(X-S)}.`);}
-  if(l===1){for(;;){const [a,b]=pick([[1,2],[3,5],[2,5],[3,4],[2,3]]),[c,d]=pick([[1,5],[1,3],[1,4],[2,5]]);const F=new Fr(a,b).mul(new Fr(d-c,d));
-    const X=F.d*ri(2,10)*500000;if(X>20000000)continue;const R=X*F.n/F.d;
+  for(;;){const [a,b]=pick([[1,2],[3,5],[2,5],[3,4],[2,3]]),[c,d]=pick([[1,5],[1,3],[1,4],[2,5]]);const F=new Fr(a,b).mul(new Fr(d-c,d));
+    const X=F.d*ri(2,10)*500000;if(X>20000000)continue;const R=X*F.n/F.d,S=X*a/b;
+    if(l===1)return mk(`Ibu menyimpan <b>${fs(a,b)}</b> dari gajinya. <b>${fs(c,d)}</b> dari uang yang disimpan digunakan untuk membayar listrik. Jika gaji Ibu <b>${rp(X)}</b>, maka sisa uang simpanan Ibu sekarang adalah ....`,R,
+      [S*c/d,S-X*c/d,X-S-S*c/d].filter(x=>intOK(x/1000)),rp,
+      `Uang yang disimpan = ${fs(a,b)} × ${rp(X)} = ${rp(S)}. Untuk listrik ${fs(c,d)} × ${rp(S)} = ${rp(S*c/d)}. Sisa simpanan = ${rp(S)} − ${rp(S*c/d)} = ${rp(R)}.`);
     return mk(`Ibu menyimpan <b>${fs(a,b)}</b> dari gajinya. <b>${fs(c,d)}</b> dari uang yang disimpan digunakan untuk membayar listrik. Jika sisa uang simpanan Ibu sekarang <b>${rp(R)}</b>, berapakah total gaji Ibu?`,X,
       [R*b/a,R*d/(d-c),a/b-c/d>0?R/(a/b-c/d):null].filter(x=>x&&intOK(x/1000)),rp,
-      `Simpanan yang tersisa = ${fs(d-c,d)} × ${fs(a,b)} = ${fs(F.n,F.d)} gaji. ${fs(F.n,F.d)} bagian = ${rp(R)}, jadi gaji = ${rp(R)} : ${F.n} × ${F.d} = ${rp(X)}.`);}}
-  for(;;){const [a,b]=pick([[2,3],[3,4],[3,5],[4,5],[1,2]]),T=(b-a)*pick([5000,10000,20000])*ri(1,4);const E=2*T*b/(b-a),Dn=E*a/b;if(!Number.isInteger(E/1000)||E>500000)continue;
-    const askE=R()<0.6;
-    return mk(`Uang Dina adalah <b>${fs(a,b)}</b> dari uang Eka. Jika Eka memberikan <b>${rp(T)}</b> kepada Dina, maka uang mereka menjadi sama banyak. Uang ${askE?'Eka':'Dina'} mula-mula adalah ....`,askE?E:Dn,
-      askE?[E/2,Dn,E+T,E-T]:[E,Dn/2,Dn+T,Dn-T],rp,
-      `Selisih uang mereka mula-mula = 2 × ${rp(T)} = ${rp(2*T)} (Eka berkurang ${rp(T)}, Dina bertambah ${rp(T)}). Selisih itu = 1 − ${fs(a,b)} = ${fs(b-a,b)} uang Eka. Uang Eka = ${rp(2*T)} : ${b-a} × ${b} = ${rp(E)}, uang Dina = ${rp(Dn)}.`,{step:pick([5000,10000])});}
+      `Simpanan yang tersisa = ${fs(d-c,d)} × ${fs(a,b)} = ${fs(F.n,F.d)} gaji. ${fs(F.n,F.d)} bagian = ${rp(R)}, jadi gaji = ${rp(R)} : ${F.n} × ${F.d} = ${rp(X)}.`);}
 };
 
 /* 33 Perbandingan */
@@ -852,25 +842,22 @@ G[34]=l=>{
     `Diskon pertama: ${rp(H)} − ${p1}% = ${rp(B1)}. Diskon tambahan dihitung dari ${rp(B1)}: ${rp(B1)} − ${p2}% × ${rp(B1)} = ${rp(B2)}. Jadi diskonnya tidak sama dengan ${p1+p2}%.`);
 };
 
-/* 35 Diskon: harga sebelum diskon dan persen */
+/* 35 Diskon: harga sebelum diskon dan persen
+   Mudah: harga awal (diskon 10/20/25/50%) · Sedang: persen diskon atau potongan · Sukar: harga awal (diskon 15–45%) */
 G[35]=l=>{
   const it=pick(['baju','tas','buku','sepatu','mainan']);
   if(l===0){const p=pick([10,20,25,50]),H=ri(4,20)*20000,B=H*(100-p)/100;
     return mk(`Sebuah ${it} mendapat diskon <b>${p}%</b> sehingga harga yang harus dibayar menjadi <b>${rp(B)}</b>. Harga ${it} sebelum didiskon adalah ....`,H,[B+B*p/100,B*(100+p)/100],rp,
       `Harga bayar = ${100-p}% dari harga awal. Harga awal = ${rp(B)} : ${100-p} × 100 = ${rp(H)}.`);}
-  if(l===1){const t=pick(['awal','persen','pot']);
-    if(t==='awal'){const p=pick([15,30,35,40,45]),H=ri(3,20)*20000,B=H*(100-p)/100;
-      return mk(`Harga sebuah ${it} setelah mendapat diskon <b>${p}%</b> menjadi <b>${rp(B)}</b>. Harga ${it} sebelum didiskon adalah ....`,H,[B*(100+p)/100,B+p*1000].filter(x=>intOK(x/100)),rp,
-        `Harga bayar = ${100-p}% harga awal. Harga awal = ${rp(B)} : ${100-p} × 100 = ${rp(H)}. (Menambah ${p}% dari ${rp(B)} tidak tepat karena diskon dihitung dari harga awal.)`);}
-    if(t==='persen'){const p=pick([10,15,20,25,30,35,40]),H=ri(2,16)*20000,B=H*(100-p)/100;
+  if(l===1){if(R()<0.5){const p=pick([10,15,20,25,30,35,40]),H=ri(2,16)*20000,B=H*(100-p)/100;
       return mk(`Harga awal sebuah ${it} adalah <b>${rp(H)}</b>. Setelah mendapat diskon, harganya menjadi <b>${rp(B)}</b>. Persentase diskon yang diberikan adalah ....`,p,[Math.round((H-B)/B*100),100-p],x=>x+'%',
         `Potongan = ${rp(H)} − ${rp(B)} = ${rp(H-B)}. Persentase = ${rp(H-B)} : ${rp(H)} × 100% = ${p}%.`,{step:5});}
     const p=pick([20,25,40,50]),H=ri(3,15)*20000,B=H*(100-p)/100;
     return mk(`Harga sebuah ${it} setelah mendapat diskon <b>${p}%</b> adalah <b>${rp(B)}</b>. Besar potongan harga yang diperoleh adalah ....`,H-B,[B*p/100,H].filter(x=>intOK(x/100)),rp,
       `Harga awal = ${rp(B)} : ${100-p} × 100 = ${rp(H)}. Potongan = ${rp(H)} − ${rp(B)} = ${rp(H-B)}.`);}
-  const p=pick([10,20,25,40]),H=ri(4,20)*20000,K=pick([5000,10000,15000]),Y=H*(100-p)/100-K;
-  return mk(`Sebuah ${it} mendapat diskon <b>${p}%</b>. Setelah itu, Rina memakai kupon potongan <b>${rp(K)}</b> sehingga ia hanya membayar <b>${rp(Y)}</b>. Harga ${it} sebelum diskon adalah ....`,H,[(Y-K)*100/(100-p),Y*100/(100-p),(Y+K)*(100+p)/100].filter(x=>intOK(x/100)),rp,
-    `Sebelum memakai kupon harganya ${rp(Y)} + ${rp(K)} = ${rp(Y+K)}, yaitu ${100-p}% harga awal. Harga awal = ${rp(Y+K)} : ${100-p} × 100 = ${rp(H)}.`);
+  const p=pick([15,30,35,40,45]),H=ri(3,20)*20000,B=H*(100-p)/100;
+  return mk(`Harga sebuah ${it} setelah mendapat diskon <b>${p}%</b> menjadi <b>${rp(B)}</b>. Harga ${it} sebelum didiskon adalah ....`,H,[B*(100+p)/100,B+p*1000].filter(x=>intOK(x/100)),rp,
+    `Harga bayar = ${100-p}% harga awal. Harga awal = ${rp(B)} : ${100-p} × 100 = ${rp(H)}. (Menambah ${p}% dari ${rp(B)} tidak tepat karena diskon dihitung dari harga awal.)`);
 };
 
 /* gambar bangun datar */
@@ -898,106 +885,93 @@ G[36]=l=>{
     `Keliling = 2 × (panjang + lebar) = 2 × (${k} + 1) × lebar = ${2*(k+1)} × lebar. Lebar = ${K} : ${2*(k+1)} = ${w} cm, panjang = ${p} cm. Luas = ${p} × ${w} = ${p*w} cm².`,{near:false});
 };
 
-/* 37 Segitiga */
+/* 37 Segitiga
+   Mudah: luas siku-siku atau keliling sama kaki · Sedang: luas sama kaki (ada data kaki) · Sukar: mencari tinggi atau kaki */
 const TRIP=[[3,4,5],[6,8,10],[5,12,13],[9,12,15],[8,15,17],[7,24,25],[12,16,20]];
 G[37]=l=>{
   if(l===0){if(R()<0.5){const a=ri(3,15)*2,t=ri(5,20);return mk(`Sebuah segitiga siku-siku memiliki alas <b>${a} cm</b> dan tinggi <b>${t} cm</b> (lihat gambar). Luas segitiga tersebut adalah ....${figTri(a+' cm',t+' cm')}`,a*t/2,[a*t,a+t,a*t/4].filter(intOK),x=>nf(x)+' cm²',
       `Luas = alas × tinggi : 2 = ${a} × ${t} : 2 = ${a*t/2} cm².`);}
     const a=ri(6,20),k=ri(Math.ceil(a/2)+1,20);return mk(`Sebuah segitiga sama kaki memiliki alas <b>${a} cm</b> dan panjang kaki masing-masing <b>${k} cm</b> (lihat gambar). Keliling segitiga tersebut adalah ....${figTri(a+' cm','',k+' cm',true)}`,a+2*k,[a+k,2*a+k,a*k/2].filter(intOK),x=>x+' cm',
       `Keliling = ${a} + ${k} + ${k} = ${a+2*k} cm.`);}
-  if(l===1){const [h,half,c]=pick(TRIP.filter(t=>t[1]<t[0]||true));const [t,hb]=R()<0.5?[h,half]:[half,h];const a=2*hb,kk=c;
+  if(l===1){const [h,half,c]=pick(TRIP);const [t,hb]=R()<0.5?[h,half]:[half,h];const a=2*hb,kk=c;
     return mk(`Sebuah segitiga sama kaki memiliki alas <b>${a} cm</b> dan tinggi <b>${t} cm</b>, dengan panjang kaki masing-masing <b>${kk} cm</b> (lihat gambar). Luas segitiga tersebut adalah ....${figTri(a+' cm',t+' cm',kk+' cm',true)}`,a*t/2,[a*kk/2,a*t,kk*t/2].filter(intOK),x=>nf(x)+' cm²',
       `Luas = alas × tinggi : 2 = ${a} × ${t} : 2 = ${a*t/2} cm². Panjang kaki tidak dipakai, karena tinggi harus tegak lurus alas.`);}
-  const p=ri(4,10)*2,q=ri(3,8)*2,P=p*2,Q=q*2;
-  const fig=svgWrap(275,160,`<rect x="20" y="15" width="180" height="120" fill="${SV.f}" stroke="${SV.st}" stroke-width="2"/><polygon points="20,135 200,75 110,15" fill="${SV.sh}" stroke="${SV.st}" stroke-width="1.5"/>${tx(12,148,'A','end')}${tx(206,148,'B','start')}${tx(206,12,'C','start')}${tx(12,12,'D','end')}${tx(208,80,'E','start')}${tx(110,10,'F')}${tx(110,152,P+' cm')}${tx(226,110,Q+' cm','start')}`);
-  const ans=P*Q-(P*q/2)-(Q*p/2)-(p*q/2);
-  return mk(`ABCD adalah persegi panjang dengan AB = <b>${P} cm</b> dan BC = <b>${Q} cm</b>. Titik E adalah titik tengah BC dan titik F adalah titik tengah CD (lihat gambar). Luas segitiga AEF (daerah yang diarsir) adalah ....${fig}`,ans,[P*Q/2,P*Q/4,P*Q-P*q/2-Q*p/2],x=>nf(x)+' cm²',
-    `Luas persegi panjang = ${P} × ${Q} = ${P*Q}. Kurangi tiga segitiga putih: ABE = ${P} × ${q} : 2 = ${P*q/2}, ADF = ${Q} × ${p} : 2 = ${Q*p/2}, ECF = ${q} × ${p} : 2 = ${p*q/2}. Luas AEF = ${P*Q} − ${P*q/2} − ${Q*p/2} − ${p*q/2} = ${ans} cm².`);
+  if(R()<0.5){const a=ri(3,15)*2,t=ri(5,20),L=a*t/2;
+    return mk(`Sebuah segitiga memiliki luas <b>${L} cm²</b> dan panjang alas <b>${a} cm</b>. Tinggi segitiga tersebut adalah ....${figTri(a+' cm','? cm')}`,t,[L/a,L-a,2*L].filter(x=>intOK(x)&&x!==t),x=>nf(x)+' cm',
+      `Luas = alas × tinggi : 2, jadi tinggi = 2 × luas : alas = 2 × ${L} : ${a} = ${t} cm.`);}
+  const a=ri(3,10)*2,k=ri(a/2+2,25),K=a+2*k;
+  return mk(`Sebuah segitiga sama kaki memiliki keliling <b>${K} cm</b> dan panjang alas <b>${a} cm</b> (lihat gambar). Panjang salah satu kakinya adalah ....${figTri(a+' cm','','? cm',true)}`,k,[K-a,(K-a)/3,K/3].filter(x=>intOK(x)&&x!==k),x=>nf(x)+' cm',
+    `Kedua kaki sama panjang. Jumlah kedua kaki = ${K} − ${a} = ${K-a} cm, jadi satu kaki = ${K-a} : 2 = ${k} cm.`);
 };
 
-/* 38 Daerah arsiran */
+/* 38 Daerah arsiran
+   Mudah: persegi dikurangi segitiga · Sedang: persegi dipotong di pojok · Sukar: persegi panjang dikurangi persegi di tengah */
 G[38]=l=>{
-  if(l===0){const s=ri(12,25),c=ri(3,s-6),cc=120*c/s;const fig=svgWrap(200,168,`<path d="M${20+cc} 20 H140 V140 H20 V${20+cc} H${20+cc} Z" fill="${SV.sh}" stroke="${SV.st}" stroke-width="2"/><path d="M20 ${20+cc} V20 H${20+cc}" fill="none" stroke="${SV.st}" stroke-dasharray="4 3"/>${tx(20+cc/2,16,c+' cm')}${tx(80,156,s+' cm')}${tx(146,84,s+' cm','start')}`);
-    return mk(`Sebuah persegi dengan panjang sisi <b>${s} cm</b> dipotong pada salah satu pojoknya berbentuk persegi kecil dengan panjang sisi <b>${c} cm</b>. Luas bangun yang tersisa (daerah yang diarsir) adalah ....${fig}`,s*s-c*c,[(s-c)**2,s*s-4*c,s*s+c*c],x=>nf(x)+' cm²',
-      `Luas = ${s} × ${s} − ${c} × ${c} = ${s*s} − ${c*c} = ${s*s-c*c} cm².`);}
-  if(l===1){if(R()<0.5){const p=ri(14,30),w=ri(10,p-2),s=ri(4,w-4),k=Math.min(180/p,110/w),W=p*k,H=w*k,S=s*k;const fig=svgWrap(275,H+40,`<rect x="15" y="10" width="${W}" height="${H}" fill="${SV.sh}" stroke="${SV.st}" stroke-width="2"/><rect x="${15+W/2-S/2}" y="${10+H/2-S/2}" width="${S}" height="${S}" fill="#fff" stroke="${SV.st}" stroke-width="2"/>${tx(15+W/2,H+28,p+' cm')}${tx(W+22,10+H/2+4,w+' cm','start')}${tx(15+W/2,10+H/2+4,s+' cm')}`);
-      return mk(`Sebuah persegi panjang berukuran <b>${p} cm × ${w} cm</b> memuat sebuah persegi dengan panjang sisi <b>${s} cm</b> di bagian tengahnya (lihat gambar). Luas daerah yang diarsir adalah ....${fig}`,p*w-s*s,[p*w-4*s,(p-s)*(w-s),p*w+s*s],x=>nf(x)+' cm²',
-        `Luas = ${p} × ${w} − ${s} × ${s} = ${p*w} − ${s*s} = ${p*w-s*s} cm².`);}
-    const s=ri(5,15)*2;const fig=svgWrap(200,150,`<rect x="20" y="10" width="120" height="120" fill="${SV.sh}" stroke="${SV.st}" stroke-width="2"/><polygon points="20,130 140,130 ${pick([20,80,140])},10" fill="#fff" stroke="${SV.st}" stroke-width="2"/>${tx(80,146,s+' cm')}${tx(146,74,s+' cm','start')}`);
+  if(l===0){const s=ri(5,15)*2;const fig=svgWrap(200,150,`<rect x="20" y="10" width="120" height="120" fill="${SV.sh}" stroke="${SV.st}" stroke-width="2"/><polygon points="20,130 140,130 ${pick([20,80,140])},10" fill="#fff" stroke="${SV.st}" stroke-width="2"/>${tx(80,146,s+' cm')}${tx(146,74,s+' cm','start')}`);
     return mk(`Sebuah persegi dengan panjang sisi <b>${s} cm</b> memuat sebuah segitiga yang alasnya sama dengan sisi persegi dan tingginya <b>${s} cm</b> (lihat gambar). Luas daerah yang diarsir (di luar segitiga) adalah ....${fig}`,s*s/2,[s*s/4,s*s,3*s*s/4].filter(intOK),x=>nf(x)+' cm²',
       `Luas persegi = ${s*s} cm², luas segitiga = ${s} × ${s} : 2 = ${s*s/2} cm². Arsiran = ${s*s} − ${s*s/2} = ${s*s/2} cm².`,{near:false});}
-  const p=ri(15,40),w=ri(10,p-3),j=ri(1,3),k=Math.min(200/p,120/w),W=p*k,H=w*k,J=Math.max(5,j*k);const fig=svgWrap(285,H+40,`<rect x="15" y="10" width="${W}" height="${H}" fill="${SV.sh}" stroke="${SV.st}" stroke-width="2"/><rect x="${15+J}" y="${10+J}" width="${W-2*J}" height="${H-2*J}" fill="#fff" stroke="${SV.st}" stroke-width="2"/>${tx(15+W/2,10+H/2+4,'Taman')}${tx(15+W/2,H+28,p+' m')}${tx(W+22,10+H/2+4,w+' m','start')}${tx(W+22,22,j+' m (jalan)','start')}`);
-  const ans=p*w-(p-2*j)*(w-2*j);
-  return mk(`Sebuah taman berbentuk persegi panjang berukuran <b>${p} m × ${w} m</b>. Di sekeliling bagian dalam taman dibuat jalan setapak selebar <b>${j} m</b> (daerah yang diarsir). Luas jalan setapak tersebut adalah ....${fig}`,ans,[p*w-(p-j)*(w-j),2*(p+w)*j,ans+4*j*j],x=>nf(x)+' m²',
-    `Bagian dalam (tanpa jalan) berukuran (${p} − ${2*j}) × (${w} − ${2*j}) = ${p-2*j} × ${w-2*j} = ${(p-2*j)*(w-2*j)} m². Luas jalan = ${p*w} − ${(p-2*j)*(w-2*j)} = ${ans} m².`);
+  if(l===1){const s=ri(12,25),c=ri(3,s-6),cc=120*c/s;const fig=svgWrap(200,168,`<path d="M${20+cc} 20 H140 V140 H20 V${20+cc} H${20+cc} Z" fill="${SV.sh}" stroke="${SV.st}" stroke-width="2"/><path d="M20 ${20+cc} V20 H${20+cc}" fill="none" stroke="${SV.st}" stroke-dasharray="4 3"/>${tx(20+cc/2,16,c+' cm')}${tx(80,156,s+' cm')}${tx(146,84,s+' cm','start')}`);
+    return mk(`Sebuah persegi dengan panjang sisi <b>${s} cm</b> dipotong pada salah satu pojoknya berbentuk persegi kecil dengan panjang sisi <b>${c} cm</b>. Luas bangun yang tersisa (daerah yang diarsir) adalah ....${fig}`,s*s-c*c,[(s-c)**2,s*s-4*c,s*s+c*c],x=>nf(x)+' cm²',
+      `Luas = ${s} × ${s} − ${c} × ${c} = ${s*s} − ${c*c} = ${s*s-c*c} cm².`);}
+  const p=ri(14,30),w=ri(10,p-2),s=ri(4,w-4),k=Math.min(180/p,110/w),W=p*k,H=w*k,S=s*k;const fig=svgWrap(275,H+40,`<rect x="15" y="10" width="${W}" height="${H}" fill="${SV.sh}" stroke="${SV.st}" stroke-width="2"/><rect x="${15+W/2-S/2}" y="${10+H/2-S/2}" width="${S}" height="${S}" fill="#fff" stroke="${SV.st}" stroke-width="2"/>${tx(15+W/2,H+28,p+' cm')}${tx(W+22,10+H/2+4,w+' cm','start')}${tx(15+W/2,10+H/2+4,s+' cm')}`);
+  return mk(`Sebuah persegi panjang berukuran <b>${p} cm × ${w} cm</b> memuat sebuah persegi dengan panjang sisi <b>${s} cm</b> di bagian tengahnya (lihat gambar). Luas daerah yang diarsir adalah ....${fig}`,p*w-s*s,[p*w-4*s,(p-s)*(w-s),p*w+s*s],x=>nf(x)+' cm²',
+    `Luas = ${p} × ${w} − ${s} × ${s} = ${p*w} − ${s*s} = ${p*w-s*s} cm².`);
 };
 
-/* 39 Lingkaran (π = 22/7) */
+/* 39 Lingkaran (π = 22/7)
+   Mudah: r atau d diketahui · Sedang: keliling ↔ luas · Sukar: setengah lingkaran atau persegi dikurangi lingkaran */
 const LK=r=>22*r*r/7,KL=r=>44*r/7;
 G[39]=l=>{
   const r=pick([7,14,21,28,35]);
-  if(l===0){if(R()<0.5)return mk(`Sebuah lingkaran memiliki jari-jari <b>${r} cm</b>. Luas lingkaran tersebut adalah .... (${PI7})`,LK(r),[KL(r),LK(2*r),2*LK(r)],x=>nf(x)+' cm²',`Luas = 22/7 × ${r} × ${r} = ${LK(r)} cm².`);
-    return mk(`Sebuah lingkaran memiliki diameter <b>${2*r} cm</b>. Keliling lingkaran tersebut adalah .... (${PI7})`,KL(r),[KL(r)/2,LK(r),KL(2*r)],x=>nf(x)+' cm',`Keliling = 22/7 × ${2*r} = ${KL(r)} cm.`);}
-  if(l===1){const t=pick(['kl','lk','half','sq']);
-    if(t==='kl')return mk(`Keliling sebuah lingkaran adalah <b>${KL(r)} cm</b>. Luas lingkaran tersebut adalah .... (${PI7})`,LK(r),[LK(2*r),2*KL(r),LK(r)/2],x=>nf(x)+' cm²',`Keliling = 2 × 22/7 × r, jadi r = ${KL(r)} : 44 × 7 = ${r} cm. Luas = 22/7 × ${r} × ${r} = ${LK(r)} cm².`);
-    if(t==='lk')return mk(`Luas sebuah lingkaran adalah <b>${LK(r)} cm²</b>. Keliling lingkaran tersebut adalah .... (${PI7})`,KL(r),[KL(r)/2,KL(2*r),KL(r)+2*r],x=>nf(x)+' cm',`r × r = ${LK(r)} : 22 × 7 = ${r*r}, jadi r = ${r} cm. Keliling = 2 × 22/7 × ${r} = ${KL(r)} cm.`);
-    if(t==='half'){const fig=svgWrap(220,120,`<path d="M20 100 A90 90 0 0 1 200 100 Z" fill="${SV.f}" stroke="${SV.st}" stroke-width="2"/>${tx(110,116,(2*r)+' cm')}`);
-      return mk(`Perhatikan gambar setengah lingkaran dengan diameter <b>${2*r} cm</b> berikut. Luas setengah lingkaran tersebut adalah .... (${PI7})${fig}`,LK(r)/2,[LK(r),LK(2*r)/2,KL(r)/2+2*r],x=>nf(x)+' cm²',`r = ${r} cm. Luas = ½ × 22/7 × ${r} × ${r} = ${LK(r)/2} cm².`);}
-    const fig=svgWrap(160,150,`<rect x="20" y="10" width="120" height="120" fill="${SV.sh}" stroke="${SV.st}" stroke-width="2"/><circle cx="80" cy="70" r="60" fill="#fff" stroke="${SV.st}" stroke-width="2"/>${tx(80,146,(2*r)+' cm')}`);
-    return mk(`Sebuah persegi dengan panjang sisi <b>${2*r} cm</b> memuat sebuah lingkaran yang menyinggung keempat sisinya (lihat gambar). Luas daerah yang diarsir adalah .... (${PI7})${fig}`,4*r*r-LK(r),[LK(r),4*r*r-LK(r)/2,4*r*r-KL(r)].filter(x=>x>0),x=>nf(x)+' cm²',
-      `Luas persegi = ${2*r} × ${2*r} = ${4*r*r}. Luas lingkaran (r = ${r}) = ${LK(r)}. Arsiran = ${4*r*r} − ${LK(r)} = ${4*r*r-LK(r)} cm².`,{near:false});}
-  if(R()<0.5){const d=2*r;const fig=svgWrap(160,160,`<circle cx="80" cy="80" r="66" fill="${SV.sh}" stroke="${SV.st}" stroke-width="2"/><polygon points="80,14 146,80 80,146 14,80" fill="#fff" stroke="${SV.st}" stroke-width="2"/><line x1="14" y1="80" x2="146" y2="80" stroke="${SV.st}" stroke-dasharray="4 3"/>${tx(80,74,d+' cm')}`);
-    return mk(`Sebuah persegi berada di dalam lingkaran dengan keempat titik sudutnya menyentuh lingkaran (lihat gambar). Panjang diagonal persegi adalah <b>${d} cm</b>. Luas daerah yang diarsir adalah .... (${PI7})${fig}`,LK(r)-d*d/2,[d*d/2,LK(r)-r*r,LK(r)/2].filter(x=>x>0),x=>nf(x)+' cm²',
-      `Luas lingkaran (r = ${r}) = ${LK(r)} cm². Luas persegi = diagonal × diagonal : 2 = ${d} × ${d} : 2 = ${d*d/2} cm². Arsiran = ${LK(r)} − ${d*d/2} = ${LK(r)-d*d/2} cm².`,{near:false});}
-  const s=2*r;const fig=svgWrap(160,160,`<rect x="20" y="20" width="120" height="120" fill="${SV.sh}" stroke="${SV.st}" stroke-width="2"/><path d="M20 20 h60 a60 60 0 0 1 -60 60 Z M140 20 v60 a60 60 0 0 1 -60 -60 Z M140 140 h-60 a60 60 0 0 1 60 -60 Z M20 140 v-60 a60 60 0 0 1 60 60 Z" fill="#fff" stroke="${SV.st}" stroke-width="1.5"/>${tx(80,156,s+' cm')}`);
-  return mk(`Perhatikan gambar persegi dengan panjang sisi <b>${s} cm</b>. Empat seperempat lingkaran dengan jari-jari <b>${r} cm</b> dibuat dengan pusat di keempat titik sudut persegi. Luas daerah yang diarsir adalah .... (${PI7})${fig}`,s*s-LK(r),[LK(r),s*s-LK(r)/4,s*s-LK(r)/2],x=>nf(x)+' cm²',
-    `Empat seperempat lingkaran = satu lingkaran penuh dengan r = ${r}, luasnya ${LK(r)} cm². Arsiran = ${s} × ${s} − ${LK(r)} = ${s*s} − ${LK(r)} = ${s*s-LK(r)} cm².`,{near:false});
+  if(l===0){if(R()<0.5)return mk(`Sebuah lingkaran memiliki jari-jari <b>${r} cm</b>. Luas lingkaran tersebut adalah .... (${PI7})`,LK(r),[KL(r),LK(2*r),2*LK(r)],x=>nf(x)+' cm²',`Luas = 22/7 × ${r} × ${r} = ${nf(LK(r))} cm².`);
+    return mk(`Sebuah lingkaran memiliki diameter <b>${2*r} cm</b>. Keliling lingkaran tersebut adalah .... (${PI7})`,KL(r),[KL(r)/2,LK(r),KL(2*r)],x=>nf(x)+' cm',`Keliling = 22/7 × ${2*r} = ${nf(KL(r))} cm.`);}
+  if(l===1){if(R()<0.5)return mk(`Keliling sebuah lingkaran adalah <b>${nf(KL(r))} cm</b>. Luas lingkaran tersebut adalah .... (${PI7})`,LK(r),[LK(2*r),2*KL(r),LK(r)/2],x=>nf(x)+' cm²',`Keliling = 2 × 22/7 × r, jadi r = ${nf(KL(r))} : 44 × 7 = ${r} cm. Luas = 22/7 × ${r} × ${r} = ${nf(LK(r))} cm².`);
+    return mk(`Luas sebuah lingkaran adalah <b>${nf(LK(r))} cm²</b>. Keliling lingkaran tersebut adalah .... (${PI7})`,KL(r),[KL(r)/2,KL(2*r),KL(r)+2*r],x=>nf(x)+' cm',`r × r = ${nf(LK(r))} : 22 × 7 = ${nf(r*r)}, jadi r = ${r} cm. Keliling = 2 × 22/7 × ${r} = ${nf(KL(r))} cm.`);}
+  if(R()<0.5){const fig=svgWrap(220,120,`<path d="M20 100 A90 90 0 0 1 200 100 Z" fill="${SV.f}" stroke="${SV.st}" stroke-width="2"/>${tx(110,116,(2*r)+' cm')}`);
+    return mk(`Perhatikan gambar setengah lingkaran dengan diameter <b>${2*r} cm</b> berikut. Luas setengah lingkaran tersebut adalah .... (${PI7})${fig}`,LK(r)/2,[LK(r),LK(2*r)/2,KL(r)/2+2*r],x=>nf(x)+' cm²',`r = ${r} cm. Luas = ½ × 22/7 × ${r} × ${r} = ${nf(LK(r)/2)} cm².`);}
+  const fig=svgWrap(160,150,`<rect x="20" y="10" width="120" height="120" fill="${SV.sh}" stroke="${SV.st}" stroke-width="2"/><circle cx="80" cy="70" r="60" fill="#fff" stroke="${SV.st}" stroke-width="2"/>${tx(80,146,(2*r)+' cm')}`);
+  return mk(`Sebuah persegi dengan panjang sisi <b>${2*r} cm</b> memuat sebuah lingkaran yang menyinggung keempat sisinya (lihat gambar). Luas daerah yang diarsir adalah .... (${PI7})${fig}`,4*r*r-LK(r),[LK(r),4*r*r-LK(r)/2,4*r*r-KL(r)].filter(x=>x>0),x=>nf(x)+' cm²',
+    `Luas persegi = ${2*r} × ${2*r} = ${nf(4*r*r)}. Luas lingkaran (r = ${r}) = ${nf(LK(r))}. Arsiran = ${nf(4*r*r)} − ${nf(LK(r))} = ${nf(4*r*r-LK(r))} cm².`,{near:false});
 };
 
-/* 40 Volume dan kapasitas */
+/* 40 Volume dan kapasitas
+   Mudah: kapasitas balok · Sedang: kubus terisi sebagian atau persen · Sukar: air yang kurang atau sisa setelah dipakai */
 G[40]=l=>{
   const L=x=>nf(x)+' liter';
   if(l===0){const p=ri(4,15)*10,w=ri(3,8)*10,t=ri(3,8)*10,V=p*w*t/1000;
     return mk(`Sebuah bak air berbentuk balok memiliki ukuran dalam panjang <b>${p} cm</b>, lebar <b>${w} cm</b>, dan tinggi <b>${t} cm</b>. Kapasitas bak tersebut adalah ... liter.`,V,[V*10,V/10,V*1000].filter(x=>x>=1),L,
       `Volume = ${p} × ${w} × ${t} = ${nf(p*w*t)} cm³. 1 liter = 1.000 cm³, jadi ${nf(V)} liter.`,{near:false});}
-  if(l===1){const t=pick(['kubus','kurang','pakai','persen']);
-    if(t==='kubus'){const s=pick([10,20,30,40,50]),[a,b]=pick([[1,2],[3,4],[2,5],[3,5],[1,4]]),V=s**3/1000,ans=V*a/b;if(!intOK(ans))return G[40](1);
-      return mk(`Sebuah akuarium berbentuk kubus dengan panjang rusuk dalam <b>${s} cm</b> terisi air sebanyak <b>${fs(a,b)}</b> bagian. Volume air di dalam akuarium adalah ... liter.`,ans,[V,V-ans,ans*10].filter(x=>x>0&&x!==ans),L,
-        `Volume kubus = ${s} × ${s} × ${s} = ${nf(s**3)} cm³ = ${nf(V)} liter. Air = ${fs(a,b)} × ${nf(V)} = ${nf(ans)} liter.`);}
-    const p=ri(5,15)*10,w=ri(4,8)*10,h=ri(4,8)*10,V=p*w*h/1000;
-    if(t==='kurang'){const [a,b]=pick([[3,5],[2,5],[1,4],[2,3],[1,2]]);if(!intOK(V*a/b))return G[40](1);
-      return mk(`Sebuah bak berbentuk balok memiliki ukuran dalam panjang <b>${p} cm</b>, lebar <b>${w} cm</b>, dan tinggi <b>${h} cm</b>. Bak tersebut telah terisi <b>${fs(a,b)}</b> bagian. Untuk memenuhi bak tersebut, diperlukan air sebanyak ... liter.`,V*(b-a)/b,[V*a/b,V].filter(x=>x!==V*(b-a)/b),L,
-        `Kapasitas = ${p} × ${w} × ${h} = ${nf(p*w*h)} cm³ = ${nf(V)} liter. Yang belum terisi ${fs(b-a,b)} bagian = ${nf(V*(b-a)/b)} liter.`);}
-    if(t==='pakai'){const [a,b]=pick([[2,3],[3,4],[1,2],[3,5]]),F=V*a/b,U=ri(1,Math.max(1,Math.floor(F/20)))*10;if(!intOK(F)||F-U<=0)return G[40](1);
-      return mk(`Sebuah bak mandi berbentuk balok memiliki ukuran dalam panjang <b>${p} cm</b>, lebar <b>${w} cm</b>, dan tinggi <b>${h} cm</b>. Bak tersebut terisi <b>${fs(a,b)}</b> bagian, kemudian <b>${U} liter</b> air dipakai. Sisa air di dalam bak adalah ... liter.`,F-U,[V-U,F,V-F+U].filter(x=>x>0),L,
-        `Kapasitas = ${nf(p*w*h)} cm³ = ${nf(V)} liter. Air mula-mula ${fs(a,b)} × ${nf(V)} = ${nf(F)} liter. Sisa = ${nf(F)} − ${U} = ${nf(F-U)} liter.`);}
-    const pc=pick([25,35,40,45,55,60,75]),ans=V*(100-pc)/100;if(!intOK(ans))return G[40](1);
-    return mk(`Sebuah bak berbentuk balok memiliki ukuran dalam panjang <b>${p} cm</b>, lebar <b>${w} cm</b>, dan tinggi <b>${h} cm</b>. Bak tersebut terisi air sebanyak <b>${pc}%</b> dari kapasitasnya. Air yang harus ditambahkan agar bak penuh adalah ... liter.`,ans,[V*pc/100,V].filter(x=>x!==ans),L,
-      `Kapasitas = ${nf(p*w*h)} cm³ = ${nf(V)} liter. Kurang ${100-pc}% = ${100-pc}/100 × ${nf(V)} = ${nf(ans)} liter.`);}
-  for(;;){const p=ri(10,16)*10,w=ri(6,8)*10,h=ri(6,10)*10,V=p*w*h/1000,[a,b]=pick([[3,8],[1,4],[2,5],[1,3],[3,5]]),F=V*a/b;if(!intOK(F))continue;
-    const U=ri(1,Math.floor(F/50))*50;if(U<=0||U>=F)continue;const A2=ri(2,Math.floor((V-F+U)/50)-1)*50;if(A2<=0||F-U+A2>=V)continue;const ans=V-(F-U+A2);
-    return mk(`Sebuah bak mandi berbentuk balok memiliki ukuran dalam panjang <b>${p} cm</b>, lebar <b>${w} cm</b>, dan tinggi <b>${h} cm</b>. Bak tersebut terisi <b>${fs(a,b)}</b> bagian, kemudian <b>${U} liter</b> air dipakai, dan setelah itu ditambah <b>${A2} liter</b> air. Untuk memenuhi bak tersebut, diperlukan air sebanyak ... liter.`,ans,[V-(F+U+A2),F-U+A2,V-(F-U-A2)].filter(x=>x>0&&x!==ans),L,
-      `Kapasitas = ${nf(p*w*h)} cm³ = ${nf(V)} liter. Mula-mula ${fs(a,b)} × ${nf(V)} = ${nf(F)} liter. Setelah dipakai dan ditambah: ${nf(F)} − ${U} + ${A2} = ${nf(F-U+A2)} liter. Kurang ${nf(V)} − ${nf(F-U+A2)} = ${nf(ans)} liter.`);}
+  const t=l===1?pick(['kubus','persen']):pick(['kurang','pakai']);
+  if(t==='kubus'){const s=pick([10,20,30,40,50]),[a,b]=pick([[1,2],[3,4],[2,5],[3,5],[1,4]]),V=s**3/1000,ans=V*a/b;if(!intOK(ans))return G[40](l);
+    return mk(`Sebuah akuarium berbentuk kubus dengan panjang rusuk dalam <b>${s} cm</b> terisi air sebanyak <b>${fs(a,b)}</b> bagian. Volume air di dalam akuarium adalah ... liter.`,ans,[V,V-ans,ans*10].filter(x=>x>0&&x!==ans),L,
+      `Volume kubus = ${s} × ${s} × ${s} = ${nf(s**3)} cm³ = ${nf(V)} liter. Air = ${fs(a,b)} × ${nf(V)} = ${nf(ans)} liter.`);}
+  const p=ri(5,15)*10,w=ri(4,8)*10,h=ri(4,8)*10,V=p*w*h/1000;
+  if(t==='kurang'){const [a,b]=pick([[3,5],[2,5],[1,4],[2,3],[1,2]]);if(!intOK(V*a/b))return G[40](l);
+    return mk(`Sebuah bak berbentuk balok memiliki ukuran dalam panjang <b>${p} cm</b>, lebar <b>${w} cm</b>, dan tinggi <b>${h} cm</b>. Bak tersebut telah terisi <b>${fs(a,b)}</b> bagian. Untuk memenuhi bak tersebut, diperlukan air sebanyak ... liter.`,V*(b-a)/b,[V*a/b,V].filter(x=>x!==V*(b-a)/b),L,
+      `Kapasitas = ${p} × ${w} × ${h} = ${nf(p*w*h)} cm³ = ${nf(V)} liter. Yang belum terisi ${fs(b-a,b)} bagian = ${nf(V*(b-a)/b)} liter.`);}
+  if(t==='pakai'){const [a,b]=pick([[2,3],[3,4],[1,2],[3,5]]),F=V*a/b,U=ri(1,Math.max(1,Math.floor(F/20)))*10;if(!intOK(F)||F-U<=0)return G[40](l);
+    return mk(`Sebuah bak mandi berbentuk balok memiliki ukuran dalam panjang <b>${p} cm</b>, lebar <b>${w} cm</b>, dan tinggi <b>${h} cm</b>. Bak tersebut terisi <b>${fs(a,b)}</b> bagian, kemudian <b>${U} liter</b> air dipakai. Sisa air di dalam bak adalah ... liter.`,F-U,[V-U,F,V-F+U].filter(x=>x>0),L,
+      `Kapasitas = ${nf(p*w*h)} cm³ = ${nf(V)} liter. Air mula-mula ${fs(a,b)} × ${nf(V)} = ${nf(F)} liter. Sisa = ${nf(F)} − ${U} = ${nf(F-U)} liter.`);}
+  const pc=pick([25,35,40,45,55,60,75]),ans=V*(100-pc)/100;if(!intOK(ans))return G[40](l);
+  return mk(`Sebuah bak berbentuk balok memiliki ukuran dalam panjang <b>${p} cm</b>, lebar <b>${w} cm</b>, dan tinggi <b>${h} cm</b>. Bak tersebut terisi air sebanyak <b>${pc}%</b> dari kapasitasnya. Air yang harus ditambahkan agar bak penuh adalah ... liter.`,ans,[V*pc/100,V].filter(x=>x!==ans),L,
+    `Kapasitas = ${nf(p*w*h)} cm³ = ${nf(V)} liter. Kurang ${100-pc}% = ${100-pc}/100 × ${nf(V)} = ${nf(ans)} liter.`);
 };
 
-/* 41 Tinggi air dan debit */
+/* 41 Tinggi air dan debit
+   Mudah: tinggi air · Sedang: waktu mengisi dengan debit · Sukar: air dituang dari kubus ke balok */
 G[41]=l=>{
   if(l===0){const p=ri(4,10)*10,w=ri(3,6)*10,t=ri(2,9)*5,V=p*w*t/1000;if(!intOK(V))return G[41](0);
     return mk(`Sebuah bak berbentuk balok memiliki alas berukuran dalam <b>${p} cm × ${w} cm</b>. Jika bak tersebut berisi <b>${nf(V)} liter</b> air, maka tinggi air di dalam bak adalah ... cm.`,t,[V*1000/(p*w)/10,t*10,V/(p+w)*10].filter(x=>intOK(x)&&x!==t),x=>nf(x)+' cm',
       `${nf(V)} liter = ${nf(V*1000)} cm³. Tinggi = ${nf(V*1000)} : (${p} × ${w}) = ${nf(V*1000)} : ${nf(p*w)} = ${t} cm.`);}
-  if(l===1){if(R()<0.5){for(;;){const p=ri(6,12)*10,w=ri(4,8)*10,h=ri(4,6)*10,V=p*w*h/1000,[a,b]=pick([[3,5],[1,2],[2,3],[3,4],[2,5]]),q=pick([5,10,12,15,20,25,30]),F=V*a/b;if(!intOK(F)||!intOK(F/q))continue;
-      return mk(`Sebuah bak berbentuk balok kosong berukuran dalam panjang <b>${p} cm</b>, lebar <b>${w} cm</b>, dan tinggi <b>${h} cm</b> diisi air dari sebuah keran dengan debit <b>${q} liter per menit</b>. Waktu yang diperlukan agar bak terisi <b>${fs(a,b)}</b> bagian adalah ... menit.`,F/q,[V/q,(V-F)/q].filter(x=>intOK(x)&&x!==F/q),x=>nf(x)+' menit',
-        `Kapasitas = ${nf(p*w*h)} cm³ = ${nf(V)} liter. ${fs(a,b)} bagian = ${nf(F)} liter. Waktu = ${nf(F)} : ${q} = ${nf(F/q)} menit.`);}}
-    for(;;){const s=pick([20,30,40,50]),p=ri(4,8)*10,w=ri(3,6)*10,h=ri(3,6)*10,V=s**3,t=V/(p*w);if(!intOK(t)||t>=h)continue;
-      return mk(`Sebuah bak berbentuk kubus dengan rusuk dalam <b>${s} cm</b> berisi air penuh. Seluruh air tersebut dituangkan ke dalam bak berbentuk balok kosong dengan alas berukuran dalam <b>${p} cm × ${w} cm</b> dan tinggi <b>${h} cm</b>. Tinggi air di dalam bak balok sekarang adalah ... cm.`,t,[h-t,V/(p*h),V/(w*h)].filter(x=>intOK(x)&&x!==t),x=>nf(x)+' cm',
-        `Volume air = ${s} × ${s} × ${s} = ${nf(V)} cm³. Tinggi air = ${nf(V)} : (${p} × ${w}) = ${nf(V)} : ${nf(p*w)} = ${nf(t)} cm.`);}}
-  for(;;){const p=ri(5,12)*10,w=ri(4,8)*10,[a,b]=pick([[2,5],[1,2],[3,4],[2,3],[3,5]]),[c,d]=pick([[1,4],[1,5],[1,3],[1,2],[2,5]]);if(a/b<=c/d)continue;
-    const h=ri(3,10)*10,V=p*w*h/1000,U=V*(a/b-c/d);if(!intOK(U)||!intOK(V*a/b))continue;
-    return mk(`Sebuah bak berbentuk balok memiliki panjang dalam <b>${p} cm</b> dan lebar dalam <b>${w} cm</b>. Bak tersebut terisi air <b>${fs(a,b)}</b> bagian. Setelah <b>${nf(U)} liter</b> air dipakai, bak tersebut terisi <b>${fs(c,d)}</b> bagian. Tinggi bak tersebut adalah ... cm.`,h,[U*1000/(p*w),h*(a/b),h*(c/d)].filter(x=>intOK(x)&&x!==h),x=>nf(x)+' cm',
-      `Air yang dipakai = ${fs(a,b)} − ${fs(c,d)} = ${new Fr(a*d-b*c,b*d).str()} kapasitas = ${nf(U)} liter, jadi kapasitas = ${nf(V)} liter = ${nf(V*1000)} cm³. Tinggi = ${nf(V*1000)} : (${p} × ${w}) = ${h} cm.`);}
+  if(l===1){for(;;){const p=ri(6,12)*10,w=ri(4,8)*10,h=ri(4,6)*10,V=p*w*h/1000,[a,b]=pick([[3,5],[1,2],[2,3],[3,4],[2,5]]),q=pick([5,10,12,15,20,25,30]),F=V*a/b;if(!intOK(F)||!intOK(F/q))continue;
+    return mk(`Sebuah bak berbentuk balok kosong berukuran dalam panjang <b>${p} cm</b>, lebar <b>${w} cm</b>, dan tinggi <b>${h} cm</b> diisi air dari sebuah keran dengan debit <b>${q} liter per menit</b>. Waktu yang diperlukan agar bak terisi <b>${fs(a,b)}</b> bagian adalah ... menit.`,F/q,[V/q,(V-F)/q].filter(x=>intOK(x)&&x!==F/q),x=>nf(x)+' menit',
+      `Kapasitas = ${nf(p*w*h)} cm³ = ${nf(V)} liter. ${fs(a,b)} bagian = ${nf(F)} liter. Waktu = ${nf(F)} : ${q} = ${nf(F/q)} menit.`);}}
+  for(;;){const s=pick([20,30,40,50]),p=ri(4,8)*10,w=ri(3,6)*10,h=ri(3,6)*10,V=s**3,t=V/(p*w);if(!intOK(t)||t>=h)continue;
+    return mk(`Sebuah bak berbentuk kubus dengan rusuk dalam <b>${s} cm</b> berisi air penuh. Seluruh air tersebut dituangkan ke dalam bak berbentuk balok kosong dengan alas berukuran dalam <b>${p} cm × ${w} cm</b> dan tinggi <b>${h} cm</b>. Tinggi air di dalam bak balok sekarang adalah ... cm.`,t,[h-t,V/(p*h),V/(w*h)].filter(x=>intOK(x)&&x!==t),x=>nf(x)+' cm',
+      `Volume air = ${s} × ${s} × ${s} = ${nf(V)} cm³. Tinggi air = ${nf(V)} : (${p} × ${w}) = ${nf(V)} : ${nf(p*w)} = ${nf(t)} cm.`);}
 };
 
-const IND_LAB=[['Pecahan: mencari keseluruhan','Pecahan'],['Pecahan: dipakai bertahap','Pecahan'],['Pecahan: simpanan dan uang','Pecahan'],
+const IND_LAB=[['Pecahan: mencari keseluruhan','Pecahan'],['Pecahan: dipakai bertahap','Pecahan'],['Pecahan: simpanan','Pecahan'],
  ['Perbandingan','Perbandingan'],['Diskon: harga bayar','Aritmatika Sosial'],['Diskon: harga awal dan persen','Aritmatika Sosial'],
  ['Persegi dan persegi panjang','Keliling, Luas, Volume'],['Luas segitiga','Keliling, Luas, Volume'],['Luas daerah arsiran','Keliling, Luas, Volume'],
  ['Lingkaran','Keliling, Luas, Volume'],['Volume dan kapasitas','Keliling, Luas, Volume'],['Tinggi air dan debit','Keliling, Luas, Volume']];
