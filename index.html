@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Latihan Kelas 6 · Matematika dan Bahasa Indonesia</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1f4e9c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Latihan 6">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<script>if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));</script>
+
+<style>
+:root{--blue:#1f4e9c;--ink:#1d2430;--muted:#5c6677;--bg:#f3f5f9;--line:#d6dbe4}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:17px;line-height:1.5}
+.top{background:var(--blue);color:#fff;padding:14px 20px}
+.top b{font-size:19px}.top small{display:block;opacity:.85;font-size:13px}
+main{max-width:860px;margin:0 auto;padding:28px 18px 40px}
+h1{font-size:26px;margin:0 0 6px}
+p.lead{color:var(--muted);margin:0 0 22px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+a.card{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;text-decoration:none;color:var(--ink);transition:border-color .15s,box-shadow .15s}
+a.card:hover,a.card:focus-visible{border-color:var(--blue);box-shadow:0 4px 16px rgba(31,78,156,.12);outline:none}
+.card h2{margin:0 0 4px;font-size:21px;color:var(--blue)}
+.card .tag{font-size:13px;color:var(--muted);margin-bottom:12px}
+.card ul{margin:0 0 16px;padding-left:20px;font-size:15px}
+.card li{margin:3px 0}
+.card .go{margin-top:auto;align-self:flex-start;background:var(--blue);color:#fff;border-radius:9px;padding:9px 16px;font-weight:600;font-size:15px}
+h2.sec{font-size:15px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:26px 0 10px}
+.note{margin-top:22px;font-size:14px;color:var(--muted)}
+#resume{display:none;margin:0 0 18px;background:#fff8e1;border:1px solid #f0d58a;border-radius:10px;padding:10px 14px;font-size:15px}
+</style>
+</head>
+<body>
+<header class="top"><b>Latihan Kelas 6</b><small>Matematika dan Bahasa Indonesia · persiapan TKA SD 2026 dan seleksi masuk SMP</small></header>
+<main>
+  <h1>Mau latihan apa hari ini?</h1>
+  <p class="lead">Soal selalu berganti, jadi setiap latihan terasa baru.</p>
+  <div id="resume"></div>
+  <h2 class="sec">Matematika</h2>
+  <div class="cards">
+    <a class="card" href="tryout.html">
+      <h2>Tryout Matematika</h2>
+      <div class="tag">Format ujian · dengan waktu · nilai di akhir</div>
+      <ul>
+        <li><b>TO TKA</b>: 30 soal sesuai kisi-kisi TKA 2026</li>
+        <li><b>Seleksi SMP</b>: 40 soal gaya Labschool</li>
+        <li>Angka soal berubah setiap tryout</li>
+      </ul>
+      <span class="go">Mulai Tryout ›</span>
+    </a>
+    <a class="card" href="cat.html">
+      <h2>Latihan Adaptif (CAT)</h2>
+      <div class="tag">Soal menyesuaikan kemampuan · ada pembahasan</div>
+      <ul>
+        <li>Pilih bank soal, topik, dan panjang latihan</li>
+        <li>Bisa memakai target jumlah jawaban benar</li>
+        <li>Pembahasan muncul saat jawaban salah</li>
+      </ul>
+      <span class="go">Mulai Latihan ›</span>
+    </a>
+  </div>
+  <h2 class="sec">Bahasa Indonesia</h2>
+  <div class="cards">
+    <a class="card" href="bin.html">
+      <h2>Tryout Bahasa Indonesia</h2>
+      <div class="tag">Format ujian · dengan waktu · nilai di akhir</div>
+      <ul>
+        <li><b>TO TKA</b>: 30 soal, 10 wacana, sesuai kisi-kisi TKA 2026</li>
+        <li>Wacana dan urutan pilihan berganti setiap tryout</li>
+        <li>Pembahasan setiap soal setelah selesai</li>
+      </ul>
+      <span class="go">Mulai Tryout ›</span>
+    </a>
+  </div>
+  <p class="note">Jawaban dan riwayat latihan tersimpan di perangkat ini saja.</p>
+</main>
+<script>
+try{const open=k=>{const s=JSON.parse(localStorage.getItem(k)||'null');return s&&s.seed&&(!s.endAt||s.endAt>Date.now());};const L=[];if(open('tkaacak6'))L.push('Tryout Matematika');if(open('tkabinacak6'))L.push('Tryout Bahasa Indonesia');
+if(L.length){const r=document.getElementById('resume');r.innerHTML='Ada tryout yang belum selesai di perangkat ini: <b>'+L.join('</b> dan <b>')+'</b>. Buka lagi untuk melanjutkannya.';r.style.display='block';}}catch(e){}
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "Latihan Kelas 6",
+  "short_name": "Latihan 6",
+  "description": "Latihan Matematika dan Bahasa Indonesia kelas 6: tryout TKA, seleksi SMP, dan latihan adaptif.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f3f5f9",
+  "theme_color": "#1f4e9c",
+  "lang": "id",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}
